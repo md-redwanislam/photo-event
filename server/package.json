@@ -1,0 +1,40 @@
+{
+  "name": "photo-event",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/md-redwanislam/photo-event.git",
+  "author": "Md. Redwan Islam",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node dist/index.js",
+    "build": "tsc",
+    "start": "nodemon"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "datauri": "^4.1.0",
+    "dotenv": "^17.4.2",
+    "express": "4.22.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "mysql2": "^3.22.5"
+  },
+  "resolutions": {
+    "@types/express": "4.17.21"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

@@ -154,4 +154,48 @@ const resetPassword = async (
   return `Password changed for ${admin?.name} successfully`;
 };
 
-export { login, register, resetPassword };
+const updateById = async (
+  adminId: string,
+  name: string,
+  email: string,
+  bio: string,
+  profile_pic: Express.Multer.File | null,
+) => {
+  const [admin] = await db.execute<Admin[]>(
+    `Select * from admins 
+     WHERE id = UUID_TO_BIN(?)`,
+    [adminId],
+  );
+
+  let profilePicUrl: string | null = null;
+
+  if (profile_pic) {
+    const fileUri = getDataUri(profile_pic);
+
+    const cloudResponse = await cloudinary.uploader.upload(fileUri.content!, {
+      folder: "Photo Event/admins",
+      transformation: [{ width: 200, height: 200, crop: "fill" }],
+    });
+
+    profilePicUrl = cloudResponse.url;
+  }
+  await db.execute<Admin[]>(
+    `UPDATE admins SET 
+      name=?,
+      email=?,
+      bio=?,
+      profile_pic=?
+     WHERE id = UUID_TO_BIN(?)`,
+    [
+      name || admin[0].name,
+      email || admin[0].email,
+      bio || admin[0].bio,
+      profilePicUrl || admin[0].profile_pic,
+      adminId,
+    ],
+  );
+
+  return `Admin updated successfully`;
+};
+
+export { login, register, resetPassword, updateById };

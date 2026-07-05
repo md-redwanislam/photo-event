@@ -242,6 +242,7 @@ const updateImageStatus = async (
   status: "approved" | "rejected",
   reason: string | null,
 ) => {
+  const data = await getImageById(imageId);
   await db.execute<Image[]>(
     `UPDATE images
      SET
@@ -252,16 +253,16 @@ const updateImageStatus = async (
        rejection_reason = ?
      WHERE id = UUID_TO_BIN(?)`,
     [
-      caption,
-      status,
+      caption || data.caption,
+      status || data.status,
       adminId,
       new Date(),
-      status === "rejected" ? reason : null,
+      reason || data.rejection_reason,
       imageId,
     ],
   );
-  const data = await getImageById(imageId);
-  return data;
+
+  return `Image updated successfully`;
 };
 
 export { deleteImageById, get, getImageById, updateImageStatus, upload };

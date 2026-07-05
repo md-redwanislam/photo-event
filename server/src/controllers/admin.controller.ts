@@ -94,4 +94,42 @@ const resetAdminPassword = async (
   });
 };
 
-export { loginAdmin, registerAdmin, resetAdminPassword };
+const updateAdmin = async (req: Request, res: Response): Promise<void> => {
+  const adminId = req.user?.id;
+
+  if (!adminId) {
+    const err = new Error("User not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const { name, email, bio, profile_pic } = req.body as {
+    name: string;
+    email: string;
+    bio: string;
+    profile_pic: Express.Multer.File | null;
+  };
+
+  // if (!name || !email || !bio || !profile_pic) {
+  //   const err = new Error(
+  //     "All fields are required for full update",
+  //   ) as CustomError;
+  //   err.statusCode = 400;
+  //   throw err;
+  // }
+
+  const message = await AdminService.updateById(
+    adminId,
+    name,
+    email,
+    bio,
+    profile_pic,
+  );
+
+  res.status(200).send({
+    success: true,
+    message,
+  });
+};
+
+export { loginAdmin, registerAdmin, resetAdminPassword, updateAdmin };

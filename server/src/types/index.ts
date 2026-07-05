@@ -16,6 +16,8 @@ export interface Admin extends RowDataPacket {
   name: string;
   email: string;
   password: string;
+  bio: string;
+  profile_pic: string;
   created_at: Date;
   updated_at: Date;
 }

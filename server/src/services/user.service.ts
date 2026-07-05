@@ -67,19 +67,25 @@ const updateById = async (
   institute_name: string,
   class_name: string,
 ) => {
-  await db.execute<User[]>(
-    `UPDATE users SET 
-      name = ?, 
-      phone = ?, 
-      institute_name = ?, 
-      class_name = ?
-     WHERE id = UUID_TO_BIN(?)`,
-    [name, phone, institute_name, class_name, userId],
-  );
-
   const { user } = await getById(userId);
 
-  return { user };
+  await db.execute<User[]>(
+    `UPDATE users SET
+      name = ?,
+      phone = ?,
+      institute_name = ?,
+      class_name = ?
+     WHERE id = UUID_TO_BIN(?)`,
+    [
+      name || user?.name,
+      phone || user?.phone,
+      institute_name || user?.institute_name,
+      class_name || user?.class_name,
+      userId,
+    ],
+  );
+
+  return `User updated successfully`;
 };
 
 export { deleteById, get, getById, updateById };

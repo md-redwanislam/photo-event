@@ -13,6 +13,9 @@ const router = Router();
 router
   .route("/register")
   .post(singleUpload, catchAsync(AdminController.registerAdmin));
+router
+  .route("/update")
+  .put(singleUpload, catchAsync(AdminController.updateAdmin));
 router.route("/login").post(catchAsync(AdminController.loginAdmin));
 router
   .route("/reset-password")

@@ -1,3 +1,4 @@
+import { ResultSetHeader } from "mysql2";
 import db from "../configs/db";
 import { CustomError, User } from "../types/index.js";
 import { bufferToUuid } from "../utils";
@@ -44,6 +45,21 @@ const getById = async (userId: string) => {
   return { user: responseUser };
 };
 
+const deleteById = async (userId: string) => {
+  const [result] = await db.execute<ResultSetHeader>(
+    "DELETE FROM users WHERE id = UUID_TO_BIN(?)",
+    [userId],
+  );
+
+  if (result.affectedRows === 0) {
+    const err = new Error("User not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  return { message: "User deleted successfully" };
+};
+
 const updateById = async (
   userId: string,
   name: string,
@@ -72,4 +88,4 @@ const updateById = async (
   return { user };
 };
 
-export { get, getById, updateById };
+export { deleteById, get, getById, updateById };

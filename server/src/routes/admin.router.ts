@@ -6,12 +6,18 @@ import * as FileController from "../controllers/file.controller";
 import * as UserController from "../controllers/user.controller";
 import isAdmin from "../middlewares/isAdmin";
 import catchAsync from "../utils/catchAsync";
+import singleUpload from "../utils/multer";
 
 const router = Router();
 
+router
+  .route("/register")
+  .post(singleUpload, catchAsync(AdminController.registerAdmin));
 router.route("/login").post(catchAsync(AdminController.loginAdmin));
+router
+  .route("/reset-password")
+  .patch(catchAsync(AdminController.resetAdminPassword));
 router.route("/logout").post(catchAsync(AuthController.logoutUser));
-router.route("/register").post(catchAsync(AdminController.registerAdmin));
 
 router
   .route("/user/create")
@@ -22,12 +28,14 @@ router.route("/user").get(isAdmin, catchAsync(UserController.getUsers));
 router
   .route("/user/:userId")
   .get(isAdmin, catchAsync(UserController.getUserById))
+  .delete(isAdmin, catchAsync(UserController.deleteUserById))
   .patch(isAdmin, catchAsync(UserController.updateUser));
 
 router.route("/image").get(isAdmin, catchAsync(FileController.getImages));
 router
   .route("/image/:imageId")
   .get(isAdmin, catchAsync(FileController.getImageById))
-  .patch(isAdmin, catchAsync(FileController.updateImageStatus));
+  .patch(isAdmin, catchAsync(FileController.updateImageStatus))
+  .delete(isAdmin, catchAsync(FileController.deleteImageById));
 
 export default router;

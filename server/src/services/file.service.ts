@@ -70,12 +70,23 @@ const get = async () => {
     u.institute_name,
     u.class_name,
     u.created_at AS user_created_at,
-    u.updated_at AS user_updated_at
+    u.updated_at AS user_updated_at,
+
+    a.id AS admin_id,
+    a.name AS admin_name,
+    a.email AS admin_email,
+    a.role AS admin_role,
+    a.profile_pic AS admin_profile_pic,
+    a.bio AS admin_bio
 
 FROM images i
 JOIN users u 
     ON i.uploader_id = u.id
-    order by i.created_at desc;`);
+
+LEFT JOIN admins a
+    ON i.approved_by = a.id
+
+ORDER BY i.created_at DESC;`);
 
   if (rows.length <= 0) {
     const err = new Error("No data found") as CustomError;
@@ -86,7 +97,16 @@ JOIN users u
   const datas = rows.map((data: any) => {
     return {
       id: bufferToUuid(data.image_id),
-      uploader_id: bufferToUuid(data.uploader_id),
+
+      user: {
+        id: bufferToUuid(data.uploader_id),
+        name: data.uploader_name,
+        phone: data.uploader_phone,
+        institute_name: data.institute_name,
+        class_name: data.class_name,
+        created_at: data.user_created_at,
+        updated_at: data.user_updated_at,
+      },
 
       image_url: data.image_url,
       caption: data.caption,
@@ -97,13 +117,19 @@ JOIN users u
       approved_at: data.approved_at,
       rejection_reason: data.rejection_reason,
 
-      created_at: data.created_at,
-      updated_at: data.updated_at,
+      created_at: data.image_created_at,
+      updated_at: data.image_updated_at,
 
-      // joined user info
-      uploader_name: data.uploader_name,
-      institute_name: data.institute_name,
-      class_name: data.class_name,
+      admin: data.admin_id
+        ? {
+            id: bufferToUuid(data.admin_id),
+            name: data.admin_name,
+            email: data.admin_email,
+            role: data.admin_role,
+            profile_pic: data.admin_profile_pic,
+            bio: data.admin_bio,
+          }
+        : null,
     };
   });
 
@@ -112,7 +138,8 @@ JOIN users u
 
 const getImageById = async (imageId: string) => {
   const [rows] = await db.execute<any[]>(
-    `SELECT 
+    `
+    SELECT 
       i.id AS image_id,
       i.uploader_id,
       i.image_url,
@@ -121,16 +148,29 @@ const getImageById = async (imageId: string) => {
       i.approved_by,
       i.approved_at,
       i.rejection_reason,
-      i.created_at,
-      i.updated_at,
+      i.created_at AS image_created_at,
+      i.updated_at AS image_updated_at,
 
+      u.id AS uploader_id,
       u.name AS uploader_name,
+      u.phone AS uploader_phone,
       u.institute_name,
-      u.class_name
+      u.class_name,
+      u.created_at AS user_created_at,
+      u.updated_at AS user_updated_at,
+
+      a.id AS admin_id,
+      a.name AS admin_name,
+      a.email AS admin_email,
+      a.role AS admin_role,
+      a.profile_pic AS admin_profile_pic,
+      a.bio AS admin_bio
 
     FROM images i
     JOIN users u ON i.uploader_id = u.id
-    WHERE i.id = UUID_TO_BIN(?)`,
+    LEFT JOIN admins a ON i.approved_by = a.id
+    WHERE i.id = UUID_TO_BIN(?)
+    `,
     [imageId],
   );
 
@@ -144,7 +184,16 @@ const getImageById = async (imageId: string) => {
 
   return {
     id: bufferToUuid(row.image_id),
-    uploader_id: bufferToUuid(row.uploader_id),
+
+    user: {
+      id: bufferToUuid(row.uploader_id),
+      name: row.uploader_name,
+      phone: row.uploader_phone,
+      institute_name: row.institute_name,
+      class_name: row.class_name,
+      created_at: row.user_created_at,
+      updated_at: row.user_updated_at,
+    },
 
     image_url: row.image_url,
     caption: row.caption,
@@ -155,13 +204,35 @@ const getImageById = async (imageId: string) => {
     approved_at: row.approved_at,
     rejection_reason: row.rejection_reason,
 
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    created_at: row.image_created_at,
+    updated_at: row.image_updated_at,
 
-    uploader_name: row.uploader_name,
-    institute_name: row.institute_name,
-    class_name: row.class_name,
+    admin: row.admin_id
+      ? {
+          id: bufferToUuid(row.admin_id),
+          name: row.admin_name,
+          email: row.admin_email,
+          role: row.admin_role,
+          profile_pic: row.admin_profile_pic,
+          bio: row.admin_bio,
+        }
+      : null,
   };
+};
+
+const deleteImageById = async (imageId: string) => {
+  const [result] = await db.execute<ResultSetHeader>(
+    `DELETE FROM images WHERE id = UUID_TO_BIN(?)`,
+    [imageId],
+  );
+
+  if (result.affectedRows === 0) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  return { message: "Image deleted successfully" };
 };
 
 const updateImageById = async (
@@ -187,4 +258,4 @@ const updateImageById = async (
   );
 };
 
-export { get, getImageById, updateImageById, upload };
+export { deleteImageById, get, getImageById, updateImageById, upload };

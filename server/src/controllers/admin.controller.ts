@@ -1,20 +1,17 @@
 import { Request, Response } from "express";
 
-import bcrypt from "bcryptjs";
-
-import { ResultSetHeader } from "mysql2";
-import { randomUUID } from "node:crypto";
-import db from "../configs/db";
-import { Admin, CustomError } from "../types/index.js";
-import getNewToken from "../utils/getNewToken";
-import { bufferToUuid } from "../utils/index";
+import * as AdminService from "../services/admin.service";
+import { CustomError } from "../types/index.js";
 
 const registerAdmin = async (req: Request, res: Response): Promise<void> => {
-  const { name, email, password } = req.body as {
+  const { name, bio, email, password } = req.body as {
     name: string;
+    bio: string;
     email: string;
     password: string;
   };
+
+  const profile_pic = (req.file as Express.Multer.File) ?? null;
 
   if (!name || !email || !password) {
     const err = new Error("Please fill all details") as CustomError;
@@ -22,37 +19,18 @@ const registerAdmin = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const [admins] = await db.execute<Admin[]>(
-    "select * from admins where email = ?",
-    [email],
-  );
-
-  if (admins.length > 0) {
-    const err = new Error(
-      "Admin already exists with this email.",
-    ) as CustomError;
-    err.statusCode = 409;
-    throw err;
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const id = randomUUID();
-  await db.execute<ResultSetHeader>(
-    `INSERT INTO admins
-    (id, name, email, password)
-   VALUES (UUID_TO_BIN(?), ?, ?, ?)`,
-    [id, name, email, hashedPassword],
+  const result = await AdminService.register(
+    name,
+    bio,
+    email,
+    password,
+    profile_pic,
   );
 
   res.status(201).send({
     success: true,
     message: "Admin registration successful",
-    data: {
-      id,
-      name,
-      email,
-    },
+    data: result,
   });
 };
 
@@ -68,34 +46,7 @@ const loginAdmin = async (req: Request, res: Response) => {
       message: "Please provide email and password",
     });
   }
-  const [admin] = await db.execute<Admin[]>(
-    "select * from admins where email = ?",
-    [email],
-  );
-
-  if (admin.length == 0) {
-    const err = new Error("Admin not found with this email.") as CustomError;
-    err.statusCode = 404;
-    throw err;
-  }
-
-  const isPasswordMatch = await bcrypt.compare(password, admin[0]?.password);
-
-  if (!isPasswordMatch) {
-    const err = new Error("Incorrect password") as CustomError;
-    err.statusCode = 401;
-    throw err;
-  }
-
-  const id = Buffer.isBuffer(admin[0].id)
-    ? bufferToUuid(admin[0].id)
-    : admin[0].id;
-
-  const { password: _pw, ...safeUser } = admin[0];
-
-  const responseUser = { ...safeUser, id };
-
-  const { token } = await getNewToken(responseUser);
+  const { admin, token } = await AdminService.login(email, password);
 
   res
     .cookie("authToken", token, {
@@ -108,8 +59,39 @@ const loginAdmin = async (req: Request, res: Response) => {
     .send({
       success: true,
       message: "Login successful",
-      data: responseUser,
+      data: admin,
     });
 };
 
-export { loginAdmin, registerAdmin };
+const resetAdminPassword = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const adminId = req.user?.id as string;
+
+  const { currentPassword, newPassword } = req.body as {
+    currentPassword: string;
+    newPassword: string;
+  };
+
+  if (!currentPassword || !newPassword) {
+    const err = new Error(
+      "Current password and new password are required.",
+    ) as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const message = await AdminService.resetPassword(
+    adminId,
+    currentPassword,
+    newPassword,
+  );
+
+  res.status(200).json({
+    success: true,
+    message,
+  });
+};
+
+export { loginAdmin, registerAdmin, resetAdminPassword };

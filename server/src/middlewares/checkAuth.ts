@@ -9,7 +9,8 @@ const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     req.path === "/" ||
     req.path === "/api/v1/auth/register" ||
     req.path === "/api/v1/auth/login" ||
-    req.path === "/api/v1/admin/login"
+    req.path === "/api/v1/admin/login" ||
+    req.path === "/api/v1/admin/register"
   ) {
     return next();
   }

@@ -2,10 +2,59 @@ import { Request, Response } from "express";
 
 import bcrypt from "bcryptjs";
 
+import { ResultSetHeader } from "mysql2";
+import { randomUUID } from "node:crypto";
 import db from "../configs/db";
 import { Admin, CustomError } from "../types/index.js";
 import getNewToken from "../utils/getNewToken";
 import { bufferToUuid } from "../utils/index";
+
+const registerAdmin = async (req: Request, res: Response): Promise<void> => {
+  const { name, email, password } = req.body as {
+    name: string;
+    email: string;
+    password: string;
+  };
+
+  if (!name || !email || !password) {
+    const err = new Error("Please fill all details") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const [admins] = await db.execute<Admin[]>(
+    "select * from admins where email = ?",
+    [email],
+  );
+
+  if (admins.length > 0) {
+    const err = new Error(
+      "Admin already exists with this email.",
+    ) as CustomError;
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const id = randomUUID();
+  await db.execute<ResultSetHeader>(
+    `INSERT INTO admins
+    (id, name, email, password)
+   VALUES (UUID_TO_BIN(?), ?, ?, ?)`,
+    [id, name, email, hashedPassword],
+  );
+
+  res.status(201).send({
+    success: true,
+    message: "Admin registration successful",
+    data: {
+      id,
+      name,
+      email,
+    },
+  });
+};
 
 const loginAdmin = async (req: Request, res: Response) => {
   const { email, password } = req.body as {
@@ -63,4 +112,4 @@ const loginAdmin = async (req: Request, res: Response) => {
     });
 };
 
-export { loginAdmin };
+export { loginAdmin, registerAdmin };

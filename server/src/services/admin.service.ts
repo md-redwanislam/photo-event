@@ -83,7 +83,9 @@ const login = async (email: string, password: string) => {
   );
 
   if (admin.length == 0) {
-    const err = new Error("Admin not found with this email.") as CustomError;
+    const err = new Error(
+      "Admin does not found with this email.",
+    ) as CustomError;
     err.statusCode = 404;
     throw err;
   }

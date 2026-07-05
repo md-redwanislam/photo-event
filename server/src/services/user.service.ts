@@ -68,19 +68,13 @@ const updateById = async (
   class_name: string,
 ) => {
   await db.execute<User[]>(
-    `update users set 
-      name = coalesce(?, name), 
-      phone = coalesce(?, phone), 
-      institute_name = coalesce(?, institute_name), 
-      class_name = coalesce(?, class_name)
-     where id = UUID_TO_BIN(?)`,
-    [
-      name ?? null,
-      phone ?? null,
-      institute_name ?? null,
-      class_name ?? null,
-      userId,
-    ],
+    `UPDATE users SET 
+      name = ?, 
+      phone = ?, 
+      institute_name = ?, 
+      class_name = ?
+     WHERE id = UUID_TO_BIN(?)`,
+    [name, phone, institute_name, class_name, userId],
   );
 
   const { user } = await getById(userId);

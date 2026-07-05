@@ -59,6 +59,15 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
     class_name: string;
   };
 
+  // ✅ enforce PUT requirement (all fields must exist)
+  if (!name || !phone || !institute_name || !class_name) {
+    const err = new Error(
+      "All fields are required for full update",
+    ) as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
   const user = await UserServices.updateById(
     userId,
     name,
@@ -73,4 +82,5 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
     data: user,
   });
 };
+
 export { deleteUserById, getUserById, getUsers, updateUser };

@@ -235,27 +235,33 @@ const deleteImageById = async (imageId: string) => {
   return { message: "Image deleted successfully" };
 };
 
-const updateImageById = async (
+const updateImageStatus = async (
   adminId: string,
   imageId: string,
-  status: string,
-  reason: string,
+  caption: string,
+  status: "approved" | "rejected",
+  reason: string | null,
 ) => {
   await db.execute<Image[]>(
-    `update images set 
-      status = coalesce(?, status), 
-      approved_by = coalesce(UUID_TO_BIN(?), approved_by), 
-      approved_at = coalesce(?, approved_at), 
-      rejection_reason = coalesce(?, rejection_reason)
-     where id = UUID_TO_BIN(?)`,
+    `UPDATE images
+     SET
+       caption = ?,
+       status = ?,
+       approved_by = UUID_TO_BIN(?),
+       approved_at = ?,
+       rejection_reason = ?
+     WHERE id = UUID_TO_BIN(?)`,
     [
-      status ?? null,
-      adminId ?? null,
-      new Date() ?? null,
-      reason ?? null,
+      caption,
+      status,
+      adminId,
+      new Date(),
+      status === "rejected" ? reason : null,
       imageId,
     ],
   );
+  const data = await getImageById(imageId);
+  return data;
 };
 
-export { deleteImageById, get, getImageById, updateImageById, upload };
+export { deleteImageById, get, getImageById, updateImageStatus, upload };

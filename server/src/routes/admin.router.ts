@@ -29,13 +29,13 @@ router
   .route("/user/:userId")
   .get(isAdmin, catchAsync(UserController.getUserById))
   .delete(isAdmin, catchAsync(UserController.deleteUserById))
-  .patch(isAdmin, catchAsync(UserController.updateUser));
+  .put(isAdmin, catchAsync(UserController.updateUser));
 
 router.route("/image").get(isAdmin, catchAsync(FileController.getImages));
 router
   .route("/image/:imageId")
   .get(isAdmin, catchAsync(FileController.getImageById))
-  .patch(isAdmin, catchAsync(FileController.updateImageStatus))
+  .put(isAdmin, catchAsync(FileController.updateImageStatus))
   .delete(isAdmin, catchAsync(FileController.deleteImageById));
 
 export default router;

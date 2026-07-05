@@ -70,17 +70,44 @@ const updateImageStatus = async (
   const adminId = req.user?.id;
   const { imageId } = req.params;
 
-  const { status, reason } = req.body;
+  const { caption, status, reason } = req.body as {
+    caption: string;
+    status: "approved" | "rejected";
+    reason?: string;
+  };
 
   if (!imageId) {
     const err = new Error("Image not found") as CustomError;
     err.statusCode = 404;
     throw err;
   }
-  await FileService.updateImageById(adminId, imageId, status, reason);
+
+  if (!caption || !status) {
+    const err = new Error("Caption and status are required") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (status === "rejected" && !reason) {
+    const err = new Error(
+      "Rejection reason is required when rejecting an image",
+    ) as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const data = await FileService.updateImageStatus(
+    adminId,
+    imageId,
+    caption,
+    status,
+    reason ?? null,
+  );
+
   res.status(200).send({
     success: true,
-    message: "Image status updated",
+    message: "Image updated successfully",
+    data,
   });
 };
 

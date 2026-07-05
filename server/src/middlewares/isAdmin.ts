@@ -21,7 +21,7 @@ const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
 
     if (users.length == 0) {
       const err = new Error("Access denied.") as CustomError;
-      err.statusCode = 404;
+      err.statusCode = 401;
       return next(err);
     }
 

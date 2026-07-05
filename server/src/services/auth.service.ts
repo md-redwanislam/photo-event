@@ -9,14 +9,14 @@ import getNewToken from "../utils/getNewToken";
 
 const register = async (
   name: string,
-  phoneNumber: string,
-  instititueName: string,
-  rank: string,
+  phone: string,
+  institute_name: string,
+  class_name: string,
   password: string,
 ) => {
   const [users] = await db.execute<User[]>(
     "select * from users where phone = ?",
-    [phoneNumber],
+    [phone],
   );
 
   if (users.length > 0) {
@@ -35,27 +35,27 @@ const register = async (
     `INSERT INTO users
     (id, name, phone, institute_name, class_name, password)
    VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?)`,
-    [id, name, phoneNumber, instititueName, rank, password],
+    [id, name, phone, institute_name, class_name, password],
   );
 
   return {
     id,
     name,
-    phoneNumber,
-    instititueName,
-    rank,
+    phone,
+    institute_name,
+    class_name,
   };
 };
 
-const login = async (phoneNumber: string, password: string) => {
+const login = async (phone: string, password: string) => {
   const [users] = await db.execute<User[]>(
     "select * from users where phone = ?",
-    [phoneNumber],
+    [phone],
   );
 
   if (users.length == 0) {
     const err = new Error(
-      "User not found with this phonenumber. please registration first.",
+      "User not found with this phone. please registration first.",
     ) as CustomError;
     err.statusCode = 404;
     throw err;

@@ -47,9 +47,9 @@ const getById = async (userId: string) => {
 const updateById = async (
   userId: string,
   name: string,
-  phoneNumber: string,
-  instititueName: string,
-  rank: string,
+  phone: string,
+  institute_name: string,
+  class_name: string,
 ) => {
   await db.execute<User[]>(
     `update users set 
@@ -60,9 +60,9 @@ const updateById = async (
      where id = UUID_TO_BIN(?)`,
     [
       name ?? null,
-      phoneNumber ?? null,
-      instititueName ?? null,
-      rank ?? null,
+      phone ?? null,
+      institute_name ?? null,
+      class_name ?? null,
       userId,
     ],
   );

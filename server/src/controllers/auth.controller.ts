@@ -5,15 +5,15 @@ import * as AuthServices from "../services/auth.service";
 import { CustomError } from "../types/index.js";
 
 const registerUser = async (req: Request, res: Response): Promise<void> => {
-  const { name, phoneNumber, instititueName, rank, password } = req.body as {
+  const { name, phone, institute_name, class_name, password } = req.body as {
     name: string;
-    phoneNumber: string;
-    instititueName: string;
-    rank: string;
+    phone: string;
+    institute_name: string;
+    class_name: string;
     password: string;
   };
 
-  if (!name || !phoneNumber || !instititueName || !rank || !password) {
+  if (!name || !phone || !institute_name || !class_name || !password) {
     const err = new Error("Please fill all details") as CustomError;
     err.statusCode = 400;
     throw err;
@@ -21,9 +21,9 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
 
   const result = await AuthServices.register(
     name,
-    phoneNumber,
-    instititueName,
-    rank,
+    phone,
+    institute_name,
+    class_name,
     password,
   );
   res.status(201).send({
@@ -34,15 +34,15 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 const loginUser = async (req: Request, res: Response) => {
-  const { phoneNumber, password } = req.body;
+  const { phone, password } = req.body;
 
-  if (!phoneNumber || !password) {
+  if (!phone || !password) {
     return res.status(400).json({
       success: false,
       message: "Please provide email and password",
     });
   }
-  const { user, token } = await AuthServices.login(phoneNumber, password);
+  const { user, token } = await AuthServices.login(phone, password);
 
   res
     .cookie("authToken", token, {

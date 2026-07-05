@@ -37,19 +37,19 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const { name, phoneNumber, instititueName, rank } = req.body as {
+  const { name, phone, institute_name, class_name } = req.body as {
     name: string;
-    phoneNumber: string;
-    instititueName: string;
-    rank: string;
+    phone: string;
+    institute_name: string;
+    class_name: string;
   };
 
   const user = await UserServices.updateById(
     userId,
     name,
-    phoneNumber,
-    instititueName,
-    rank,
+    phone,
+    institute_name,
+    class_name,
   );
 
   res.status(200).send({

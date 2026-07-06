@@ -16,7 +16,7 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.params;
 
   if (!userId) {
-    const err = new Error("User not found") as CustomError;
+    const err = new Error("Provide user's info.") as CustomError;
     err.statusCode = 404;
     throw err;
   }
@@ -32,7 +32,7 @@ const deleteUserById = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.params;
 
   if (!userId) {
-    const err = new Error("User not found") as CustomError;
+    const err = new Error("Provide user's info.") as CustomError;
     err.statusCode = 404;
     throw err;
   }
@@ -47,7 +47,7 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
   const { userId } = req.params as { userId: string };
 
   if (!userId) {
-    const err = new Error("User not found") as CustomError;
+    const err = new Error("Provide user's info.") as CustomError;
     err.statusCode = 404;
     throw err;
   }

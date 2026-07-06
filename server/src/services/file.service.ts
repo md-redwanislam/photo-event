@@ -243,7 +243,7 @@ const updateImageStatus = async (
   reason: string | null,
 ) => {
   const data = await getImageById(imageId);
-  await db.execute<Image[]>(
+  const [result] = await db.execute<ResultSetHeader>(
     `UPDATE images
      SET
        caption = ?,
@@ -261,6 +261,12 @@ const updateImageStatus = async (
       imageId,
     ],
   );
+
+  if (result.affectedRows === 0) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
 
   return `Image updated successfully`;
 };

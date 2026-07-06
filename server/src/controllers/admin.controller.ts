@@ -98,7 +98,7 @@ const updateAdmin = async (req: Request, res: Response): Promise<void> => {
   const adminId = req.user?.id;
 
   if (!adminId) {
-    const err = new Error("User not found") as CustomError;
+    const err = new Error("Provide admin's info.") as CustomError;
     err.statusCode = 404;
     throw err;
   }

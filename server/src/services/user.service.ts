@@ -69,7 +69,7 @@ const updateById = async (
 ) => {
   const { user } = await getById(userId);
 
-  await db.execute<User[]>(
+  const [result] = await db.execute<ResultSetHeader>(
     `UPDATE users SET
       name = ?,
       phone = ?,
@@ -84,6 +84,11 @@ const updateById = async (
       userId,
     ],
   );
+  if (result.affectedRows === 0) {
+    const err = new Error("User not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
 
   return `User updated successfully`;
 };

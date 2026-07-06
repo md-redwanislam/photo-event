@@ -36,7 +36,7 @@ const getImageById = async (req: Request, res: Response): Promise<void> => {
   const { imageId } = req.params;
 
   if (!imageId) {
-    const err = new Error("Image not found") as CustomError;
+    const err = new Error("Proved image's info") as CustomError;
     err.statusCode = 404;
     throw err;
   }
@@ -52,10 +52,11 @@ const deleteImageById = async (req: Request, res: Response): Promise<void> => {
   const { imageId } = req.params;
 
   if (!imageId) {
-    const err = new Error("Image not found") as CustomError;
+    const err = new Error("Proved image's info") as CustomError;
     err.statusCode = 404;
     throw err;
   }
+
   const { message } = await FileService.deleteImageById(imageId);
   res.status(200).send({
     success: true,
@@ -69,6 +70,12 @@ const updateImageStatus = async (
 ): Promise<void> => {
   const adminId = req.user?.id;
   const { imageId } = req.params;
+
+  if (!imageId) {
+    const err = new Error("Proved image's info") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
 
   const { caption, status, reason } = req.body as {
     caption: string;

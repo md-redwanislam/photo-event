@@ -180,7 +180,7 @@ const updateById = async (
     profilePicUrl = cloudResponse.url;
   }
 
-  await db.execute<Admin[]>(
+  const [result] = await db.execute<ResultSetHeader>(
     `UPDATE admins SET 
       name=?,
       email=?,
@@ -195,6 +195,12 @@ const updateById = async (
       adminId,
     ],
   );
+
+  if (result.affectedRows === 0) {
+    const err = new Error("Admin not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
 
   return `Admin updated successfully`;
 };

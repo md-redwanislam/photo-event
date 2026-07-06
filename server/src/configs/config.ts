@@ -1,32 +1,5 @@
 import "dotenv/config";
 
-// const getEnv = (key: string, required = true): string => {
-//   const value = process.env[key];
-//   if (required && (!value || value.trim() === "")) {
-//     throw new Error(`Missing required environment variable: ${key}`);
-//   }
-//   return value ?? "";
-// };
-
-// const getNumberEnv = (
-//   key: string,
-//   required = true,
-//   defaultValue?: number,
-// ): number => {
-//   const value = process.env[key];
-//   if (!value || value.trim() === "") {
-//     if (required) {
-//       throw new Error(`Missing required environment variable: ${key}`);
-//     }
-//     return defaultValue ?? NaN;
-//   }
-//   const parsed = Number(value);
-//   if (Number.isNaN(parsed)) {
-//     throw new Error(`Invalid number for environment variable ${key}: ${value}`);
-//   }
-//   return parsed;
-// };
-
 interface AppConfig {
   port: number;
 }

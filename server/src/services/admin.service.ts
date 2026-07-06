@@ -179,6 +179,7 @@ const updateById = async (
 
     profilePicUrl = cloudResponse.url;
   }
+
   await db.execute<Admin[]>(
     `UPDATE admins SET 
       name=?,

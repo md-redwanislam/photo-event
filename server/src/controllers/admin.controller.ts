@@ -103,12 +103,13 @@ const updateAdmin = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const { name, email, bio, profile_pic } = req.body as {
+  const { name, email, bio } = req.body as {
     name: string;
     email: string;
     bio: string;
-    profile_pic: Express.Multer.File | null;
   };
+
+  const profile_pic = (req.file as Express.Multer.File) ?? null;
 
   // if (!name || !email || !bio || !profile_pic) {
   //   const err = new Error(

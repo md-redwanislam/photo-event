@@ -53,7 +53,8 @@ const upload = async (
 };
 
 const getImages = async () => {
-  const [rows] = await db.execute<Image[]>(`SELECT 
+  const [rows] = await db.execute<Image[]>(`
+SELECT 
     i.id AS image_id,
     i.image_url,
     i.caption,
@@ -73,7 +74,9 @@ const getImages = async () => {
 FROM images i
 JOIN users u 
     ON i.uploader_id = u.id
-ORDER BY i.created_at DESC;`);
+WHERE i.status = 'approved'
+ORDER BY i.created_at DESC;
+`);
 
   if (rows.length <= 0) {
     const err = new Error("No image found") as CustomError;
@@ -133,8 +136,9 @@ const getImageById = async (imageId: string) => {
     JOIN users u ON i.uploader_id = u.id
 
     WHERE i.id = UUID_TO_BIN(?)
+    AND i.status = ?
     `,
-    [imageId],
+    [imageId, "approved"],
   );
 
   if (rows.length === 0) {

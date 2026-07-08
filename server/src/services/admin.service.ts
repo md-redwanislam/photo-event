@@ -37,7 +37,6 @@ const register = async (
 
     const cloudResponse = await cloudinary.uploader.upload(fileUri.content!, {
       folder: "Photo Event/admins",
-      transformation: [{ width: 200, height: 200, crop: "fill" }],
     });
 
     profilePicUrl = cloudResponse.url;

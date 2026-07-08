@@ -10,28 +10,10 @@ const upload = async (
   caption: string,
   image: Express.Multer.File,
 ) => {
-  // const { user } = await getById(userId);
-  // const [rows] = await db.execute<Image[]>(
-  //   `
-  //   SELECT id
-  //   FROM images
-  //   WHERE uploader_id = UUID_TO_BIN(?)
-  //   LIMIT 1
-  // `,
-  //   [user.id],
-  // );
-
-  // if (rows.length > 0) {
-  //   const err = new Error("You have already uploaded an image.") as CustomError;
-  //   err.statusCode = 409;
-  //   throw err;
-  // }
-
   const fileUri = getDataUri(image);
 
   const cloudResponse = await cloudinary.uploader.upload(fileUri.content!, {
     folder: "Photo Event/images",
-    transformation: [{ width: 200, height: 200, crop: "fill" }],
   });
 
   await db.execute<ResultSetHeader>(
@@ -49,6 +31,40 @@ const upload = async (
       )`,
     [userId, cloudResponse.url, caption ?? null],
   );
+};
+
+const getUserImage = async (userId: string) => {
+  const [rows] = await db.execute<any[]>(
+    `SELECT *
+FROM images
+WHERE uploader_id = UUID_TO_BIN(?);`,
+    [userId],
+  );
+
+  if (rows.length === 0) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const datas = rows.map((data) => ({
+    ...data,
+    id: Buffer.isBuffer(data.id) ? bufferToUuid(data.id) : data.id,
+    uploader_id: Buffer.isBuffer(data.uploader_id)
+      ? bufferToUuid(data.uploader_id)
+      : data.uploader_id,
+  }));
+
+  return datas.map((data) => ({
+    id: data.id,
+    image_url: data.image_url,
+    caption: data.caption,
+    status: data.status,
+    approved_at: data.approved_at,
+    rejection_reason: data.rejection_reason,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+  }));
 };
 
 const getAdminImages = async () => {
@@ -274,6 +290,7 @@ export {
   deleteImageById,
   getAdminImageById,
   getAdminImages,
+  getUserImage,
   updateImageStatus,
   upload,
 };

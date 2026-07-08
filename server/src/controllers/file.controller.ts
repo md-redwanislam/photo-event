@@ -23,6 +23,23 @@ const uploadImage = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
+const getUserImages = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user?.id as string;
+
+  if (!userId) {
+    const err = new Error("Please provide user's info") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const data = await FileService.getUserImage(userId);
+  res.status(200).send({
+    success: true,
+    message: "Image found successfully",
+    data: data,
+  });
+};
+
 const getAdminImages = async (_req: Request, res: Response): Promise<void> => {
   const result = await FileService.getAdminImages();
   res.status(200).send({
@@ -104,6 +121,7 @@ export {
   deleteImageById,
   getAdminImageById,
   getAdminImages,
+  getUserImages,
   updateImageStatus,
   uploadImage,
 };

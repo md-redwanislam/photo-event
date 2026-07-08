@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import * as AdminController from "../controllers/admin.controller";
 import * as AuthController from "../controllers/auth.controller";
+import * as FAQController from "../controllers/faq.controller";
 import * as FileController from "../controllers/file.controller";
 import * as UserController from "../controllers/user.controller";
 import isAdmin from "../middlewares/isAdmin";
@@ -9,6 +10,14 @@ import catchAsync from "../utils/catchAsync";
 import singleUpload from "../utils/multer";
 
 const router = Router();
+
+router.route("/faq").post(isAdmin, catchAsync(FAQController.createFaq));
+
+router
+  .route("/faq/:faqId")
+  .get(isAdmin, catchAsync(FAQController.getFaqById))
+  .put(isAdmin, catchAsync(FAQController.updateFaq))
+  .delete(isAdmin, catchAsync(FAQController.deleteFaq));
 
 router
   .route("/register")

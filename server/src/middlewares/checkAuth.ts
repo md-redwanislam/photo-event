@@ -7,6 +7,7 @@ import { CustomError } from "../types";
 const checkAuth = (req: Request, res: Response, next: NextFunction) => {
   if (
     req.path === "/" ||
+    req.path === "/api/v1/faq" ||
     req.path === "/api/v1/auth/register" ||
     req.path === "/api/v1/auth/login" ||
     req.path === "/api/v1/admin/login" ||

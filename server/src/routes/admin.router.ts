@@ -12,10 +12,10 @@ const router = Router();
 
 router
   .route("/register")
-  .post(singleUpload, catchAsync(AdminController.registerAdmin));
+  .post(singleUpload("profile_pic"), catchAsync(AdminController.registerAdmin));
 router
   .route("/update")
-  .put(singleUpload, catchAsync(AdminController.updateAdmin));
+  .put(singleUpload("profile_pic"), catchAsync(AdminController.updateAdmin));
 router.route("/login").post(catchAsync(AdminController.loginAdmin));
 router
   .route("/reset-password")

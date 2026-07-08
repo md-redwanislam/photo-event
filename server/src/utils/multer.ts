@@ -2,6 +2,7 @@ import multer from "multer";
 
 const storage = multer.memoryStorage();
 
-const singleUpload = multer({ storage }).single("profile_pic");
+const upload = multer({ storage });
+const singleUpload = (fieldName: string) => upload.single(fieldName);
 
 export default singleUpload;

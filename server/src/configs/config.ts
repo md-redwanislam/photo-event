@@ -21,7 +21,7 @@ interface JWTConfig {
 }
 
 interface CorsConfig {
-  origin: string | undefined;
+  origin: string[] | undefined;
 }
 
 interface LimitConfig {
@@ -62,7 +62,7 @@ const config: Config = {
     cert: process.env.MYSQL_CA_CERT,
   },
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: process.env.CLIENT_URL?.split(",").map((url) => url.trim()) || [],
   },
   jwtoken: {
     secretKey: process.env.SECRET_KEY,

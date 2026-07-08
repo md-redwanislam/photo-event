@@ -23,8 +23,8 @@ const uploadImage = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-const getImages = async (_req: Request, res: Response): Promise<void> => {
-  const result = await FileService.get();
+const getImages = async (req: Request, res: Response): Promise<void> => {
+  const result = await FileService.getImages();
   res.status(200).send({
     success: true,
     message: "Images found successfully",
@@ -36,11 +36,39 @@ const getImageById = async (req: Request, res: Response): Promise<void> => {
   const { imageId } = req.params;
 
   if (!imageId) {
-    const err = new Error("Proved image's info") as CustomError;
+    const err = new Error("Provide image's info") as CustomError;
     err.statusCode = 404;
     throw err;
   }
   const data = await FileService.getImageById(imageId);
+  res.status(200).send({
+    success: true,
+    message: "Image found successfully",
+    data: data,
+  });
+};
+
+const getAdminImages = async (_req: Request, res: Response): Promise<void> => {
+  const result = await FileService.getAdminImages();
+  res.status(200).send({
+    success: true,
+    message: "Images found successfully",
+    data: result,
+  });
+};
+
+const getAdminImageById = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const { imageId } = req.params;
+
+  if (!imageId) {
+    const err = new Error("Proved image's info") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+  const data = await FileService.getAdminImageById(imageId);
   res.status(200).send({
     success: true,
     message: "Image found successfully",
@@ -99,6 +127,8 @@ const updateImageStatus = async (
 
 export {
   deleteImageById,
+  getAdminImageById,
+  getAdminImages,
   getImageById,
   getImages,
   updateImageStatus,

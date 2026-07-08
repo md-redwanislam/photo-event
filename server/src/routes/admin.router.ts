@@ -34,10 +34,10 @@ router
   .delete(isAdmin, catchAsync(UserController.deleteUserById))
   .put(isAdmin, catchAsync(UserController.updateUser));
 
-router.route("/image").get(isAdmin, catchAsync(FileController.getImages));
+router.route("/image").get(isAdmin, catchAsync(FileController.getAdminImages));
 router
   .route("/image/:imageId")
-  .get(isAdmin, catchAsync(FileController.getImageById))
+  .get(isAdmin, catchAsync(FileController.getAdminImageById))
   .put(isAdmin, catchAsync(FileController.updateImageStatus))
   .delete(isAdmin, catchAsync(FileController.deleteImageById));
 

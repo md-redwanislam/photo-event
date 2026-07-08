@@ -10,7 +10,4 @@ router
   .route("/upload")
   .post(singleUpload("image"), catchAsync(FileController.uploadImage));
 
-router.route("/").get(FileController.getImages);
-router.route("/:imageId").get(FileController.getImageById);
-
 export default router;

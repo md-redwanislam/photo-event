@@ -23,6 +23,9 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
 
   res
     .cookie("authToken", token, {
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(201)
@@ -45,6 +48,9 @@ const loginUser = async (req: Request, res: Response) => {
 
   res
     .cookie("authToken", token, {
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(200)

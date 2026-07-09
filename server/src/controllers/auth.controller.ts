@@ -46,9 +46,6 @@ const loginUser = async (req: Request, res: Response) => {
 
   res
     .cookie("authToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(200)
@@ -60,17 +57,10 @@ const loginUser = async (req: Request, res: Response) => {
 };
 
 const logoutUser = async (req: Request, res: Response): Promise<void> => {
-  res
-    .clearCookie("authToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    })
-    .status(200)
-    .json({
-      success: true,
-      message: "Logged out successfully",
-    });
+  res.clearCookie("authToken").status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
 };
 
 export { loginUser, logoutUser, registerUser };

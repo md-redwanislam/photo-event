@@ -5,13 +5,7 @@ import * as AuthServices from "../services/auth.service";
 import { CustomError } from "../types/index.js";
 
 const registerUser = async (req: Request, res: Response): Promise<void> => {
-  const { name, phone, institute_name, class_name, password } = req.body as {
-    name: string;
-    phone: string;
-    institute_name: string;
-    class_name: string;
-    password: string;
-  };
+  const { name, phone, institute_name, class_name, password } = req.body;
 
   if (!name || !phone || !institute_name || !class_name || !password) {
     const err = new Error("Please fill all details") as CustomError;
@@ -19,20 +13,25 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const result = await AuthServices.register(
+  const { user, token } = await AuthServices.register(
     name,
     phone,
     institute_name,
     class_name,
     password,
   );
-  res.status(201).send({
-    success: true,
-    message: "Registration successful",
-    data: result,
-  });
-};
 
+  res
+    .cookie("authToken", token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+    .status(201)
+    .send({
+      success: true,
+      message: "Registration successful",
+      data: user,
+    });
+};
 const loginUser = async (req: Request, res: Response) => {
   const { phone, password } = req.body;
 

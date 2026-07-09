@@ -30,19 +30,27 @@ const register = async (
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const id = randomUUID();
-  const [rows] = await db.execute<ResultSetHeader>(
+
+  await db.execute<ResultSetHeader>(
     `INSERT INTO users
-    (id, name, phone, institute_name, class_name, password)
-   VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?)`,
+      (id, name, phone, institute_name, class_name, password)
+     VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?)`,
     [id, name, phone, institute_name, class_name, hashedPassword],
   );
 
-  return {
+  const user = {
     id,
     name,
     phone,
     institute_name,
     class_name,
+  };
+
+  const { token } = await getNewToken(user);
+
+  return {
+    user,
+    token,
   };
 };
 

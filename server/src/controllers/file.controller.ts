@@ -40,6 +40,37 @@ const getUserImages = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
+const updateImage = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user?.id as string;
+  const imageId = req.params.id;
+
+  const { caption } = req.body;
+
+  await FileService.update(
+    userId,
+    imageId,
+    caption,
+    req.file as Express.Multer.File | undefined,
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Image updated successfully",
+  });
+};
+
+const deleteImage = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user?.id as string;
+  const imageId = req.params.id;
+
+  await FileService.remove(userId, imageId);
+
+  res.status(200).json({
+    success: true,
+    message: "Image deleted successfully",
+  });
+};
+
 const getAdminImages = async (_req: Request, res: Response): Promise<void> => {
   const result = await FileService.getAdminImages();
   res.status(200).send({
@@ -118,10 +149,12 @@ const updateImageStatus = async (
 };
 
 export {
+  deleteImage,
   deleteImageById,
   getAdminImageById,
   getAdminImages,
   getUserImages,
+  updateImage,
   updateImageStatus,
   uploadImage,
 };

@@ -9,10 +9,11 @@ const checkAuth = (req: Request, res: Response, next: NextFunction) => {
     req.path === "/" ||
     req.path === "/api/v1/faq" ||
     req.path === "/api/v1/auth/register" ||
+    req.path === "/api/v1/admin/register" ||
     req.path === "/api/v1/auth/login" ||
     req.path === "/api/v1/admin/login" ||
-    req.path.startsWith("/api/v1/image") ||
-    req.path === "/api/v1/admin/register"
+    req.path.startsWith("/api/v1/auth/reset-password") ||
+    req.path.startsWith("/api/v1/image")
   ) {
     return next();
   }

@@ -21,15 +21,17 @@ const upload = async (
       (
         uploader_id,
         image_url,
+        public_id,
         caption
       )
      VALUES
       (
         UUID_TO_BIN(?),
         ?,
+        ?,
         ?
       )`,
-    [userId, cloudResponse.url, caption ?? null],
+    [userId, cloudResponse.url, cloudResponse.public_id, caption ?? null],
   );
 };
 
@@ -65,6 +67,99 @@ WHERE uploader_id = UUID_TO_BIN(?);`,
     created_at: data.created_at,
     updated_at: data.updated_at,
   }));
+};
+
+const update = async (
+  userId: string,
+  imageId: string,
+  caption: string,
+  image?: Express.Multer.File,
+) => {
+  const [rows] = await db.execute<any[]>(
+    `
+      SELECT image_url
+      FROM images
+      WHERE id = UUID_TO_BIN(?)
+      AND uploader_id = UUID_TO_BIN(?),
+      AND status = 'rejected'
+    `,
+    [imageId, userId],
+  );
+
+  if (rows.length === 0) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  let imageUrl = rows[0].image_url;
+
+  if (image) {
+    if (rows[0].public_id) {
+      await cloudinary.uploader.destroy(rows[0].public_id);
+    }
+    const fileUri = getDataUri(image);
+
+    const cloudResponse = await cloudinary.uploader.upload(fileUri.content!, {
+      folder: "Photo Event/images",
+    });
+
+    imageUrl = cloudResponse.url;
+  }
+
+  await db.execute<ResultSetHeader>(
+    `
+      UPDATE images
+      SET
+        image_url = ?,
+        caption = ?,
+        updated_at = NOW()
+      WHERE
+        id = UUID_TO_BIN(?)
+        AND uploader_id = UUID_TO_BIN(?)
+    `,
+    [imageUrl, caption ?? null, imageId, userId],
+  );
+};
+
+const remove = async (userId: string, imageId: string) => {
+  const [rows] = await db.execute<any[]>(
+    `
+  SELECT public_id
+  FROM images
+  WHERE
+      id = UUID_TO_BIN(?)
+      AND uploader_id = UUID_TO_BIN(?),
+      AND status = 'rejected'
+  `,
+    [imageId, userId],
+  );
+
+  if (!rows.length) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (rows[0].public_id) {
+    await cloudinary.uploader.destroy(rows[0].public_id);
+  }
+
+  const [result] = await db.execute<ResultSetHeader>(
+    `
+      DELETE FROM images
+      WHERE
+        id = UUID_TO_BIN(?)
+        AND uploader_id = UUID_TO_BIN(?)
+    `,
+    [imageId, userId],
+  );
+
+  if (result.affectedRows === 0) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
 };
 
 const getAdminImages = async () => {
@@ -291,6 +386,8 @@ export {
   getAdminImageById,
   getAdminImages,
   getUserImage,
+  remove,
+  update,
   updateImageStatus,
   upload,
 };

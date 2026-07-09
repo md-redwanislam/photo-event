@@ -23,9 +23,6 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
 
   res
     .cookie("authToken", token, {
-      httpOnly: false,
-      secure: true,
-      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(201)
@@ -48,9 +45,6 @@ const loginUser = async (req: Request, res: Response) => {
 
   res
     .cookie("authToken", token, {
-      httpOnly: false,
-      secure: true,
-      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
     .status(200)
@@ -68,4 +62,55 @@ const logoutUser = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-export { loginUser, logoutUser, registerUser };
+const sendResetOtp = async (req: Request, res: Response) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return res.status(400).json({
+      success: false,
+      message: "Phone number is required",
+    });
+  }
+
+  await AuthServices.sendResetOtp(phone);
+
+  res.status(200).json({
+    success: true,
+    message: "OTP sent successfully",
+  });
+};
+
+const verifyOtp = async (req: Request, res: Response) => {
+  const phone = req.query.phone as string;
+
+  const { otp } = req.body;
+
+  await AuthServices.verifyResetOtp(phone, otp);
+
+  res.status(200).json({
+    success: true,
+    message: "OTP verified successfully",
+  });
+};
+
+const resetPassword = async (req: Request, res: Response) => {
+  const phone = req.query.phone as string;
+
+  const { newPassword } = req.body;
+
+  await AuthServices.resetPassword(phone, newPassword);
+
+  res.status(200).json({
+    success: true,
+    message: "Password reset successful",
+  });
+};
+
+export {
+  loginUser,
+  logoutUser,
+  registerUser,
+  resetPassword,
+  sendResetOtp,
+  verifyOtp,
+};

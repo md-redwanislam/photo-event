@@ -10,6 +10,11 @@ router
   .route("/upload")
   .post(singleUpload("image"), catchAsync(FileController.uploadImage));
 
+router
+  .route("/:id")
+  .put(singleUpload("image"), catchAsync(FileController.updateImage))
+  .delete(catchAsync(FileController.deleteImage));
+
 router.route("/").get(catchAsync(FileController.getUserImages));
 
 export default router;

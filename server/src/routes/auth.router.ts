@@ -9,4 +9,13 @@ router.route("/register").post(catchAsync(AuthController.registerUser));
 router.route("/login").post(catchAsync(AuthController.loginUser));
 router.route("/logout").post(catchAsync(AuthController.logoutUser));
 
+router.post(
+  "/reset-password/send-otp",
+  catchAsync(AuthController.sendResetOtp),
+);
+
+router.post("/reset-password/verify-otp", catchAsync(AuthController.verifyOtp));
+
+router.post("/reset-password", catchAsync(AuthController.resetPassword));
+
 export default router;

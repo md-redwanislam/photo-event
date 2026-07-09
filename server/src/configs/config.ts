@@ -38,11 +38,19 @@ interface CloudinaryConfig {
   cloudinary_api_key: string | undefined;
   cloudinary_api_secret: string | undefined;
 }
+interface SMSConfig {
+  host: string | undefined;
+  port: string | undefined;
+  apiKey: string | undefined;
+  secretKey: string | undefined;
+  callerID: string | undefined;
+}
 
 interface Config {
   app: AppConfig;
   db: DBConfig;
   jwtoken: JWTConfig;
+  sms: SMSConfig;
   cors: CorsConfig;
   limit: LimitConfig;
   limiter: LimiterConfig;
@@ -69,6 +77,13 @@ const config: Config = {
     expiresIn: process.env.JWT_EXPIRES_IN,
     refresh_secretKey: process.env.REFRESH_SECRET_KEY,
     refresh_expiresIn: process.env.REFRESH_JWT_EXPIRES_IN,
+  },
+  sms: {
+    host: process.env.SMS_HOST,
+    port: process.env.SMS_PORT,
+    apiKey: process.env.SMS_API_KEY,
+    secretKey: process.env.SMS_SECRET_KEY,
+    callerID: process.env.SMS_CALLER_ID,
   },
   limit: {
     maxJsonSize: process.env.MAX_JSON_SIZE,

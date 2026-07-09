@@ -6,6 +6,8 @@ export interface User extends RowDataPacket {
   phone: string;
   institute_name: string;
   class_name: string;
+  otp: string | null;
+  otp_expires_at: Date | null;
   password: string;
   created_at: Date;
   updated_at: Date;

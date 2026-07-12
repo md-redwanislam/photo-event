@@ -134,8 +134,8 @@ const verifyResetOtp = async (phone: string, otp: string) => {
   const [users] = await db.execute<User[]>(
     `SELECT *
      FROM users
-     WHERE phone = ?,
-     and otp = ?`,
+     WHERE phone = ?
+     AND otp = ?`,
     [phone, otp],
   );
 

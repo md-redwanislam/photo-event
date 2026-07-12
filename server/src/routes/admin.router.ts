@@ -11,7 +11,10 @@ import singleUpload from "../utils/multer";
 
 const router = Router();
 
-router.route("/faq").post(isAdmin, catchAsync(FAQController.createFaq));
+router
+  .route("/faq")
+  .get(isAdmin, catchAsync(FAQController.getAdminFaqs))
+  .post(isAdmin, catchAsync(FAQController.createFaq));
 
 router
   .route("/faq/:faqId")

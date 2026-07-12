@@ -29,6 +29,16 @@ const getFaqs = async (_req: Request, res: Response): Promise<void> => {
   });
 };
 
+const getAdminFaqs = async (_req: Request, res: Response): Promise<void> => {
+  const data = await FAQService.getFaqs();
+
+  res.status(200).send({
+    success: true,
+    message: "FAQs fetched successfully",
+    data,
+  });
+};
+
 const getFaqById = async (req: Request, res: Response): Promise<void> => {
   const { faqId } = req.params;
 
@@ -83,4 +93,4 @@ const deleteFaq = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-export { createFaq, deleteFaq, getFaqById, getFaqs, updateFaq };
+export { createFaq, deleteFaq, getAdminFaqs, getFaqById, getFaqs, updateFaq };

@@ -29,7 +29,7 @@ ORDER BY i.created_at DESC;
 `);
 
   if (rows.length <= 0) {
-    const err = new Error("No image found") as CustomError;
+    const err = new Error("Canvas is empty") as CustomError;
     err.statusCode = 404;
     throw err;
   }
@@ -92,7 +92,7 @@ const getImageById = async (imageId: string) => {
   );
 
   if (rows.length === 0) {
-    const err = new Error("Image not found") as CustomError;
+    const err = new Error("Your canvas is empty") as CustomError;
     err.statusCode = 404;
     throw err;
   }

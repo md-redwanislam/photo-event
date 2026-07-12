@@ -44,7 +44,7 @@ WHERE uploader_id = UUID_TO_BIN(?);`,
   );
 
   if (rows.length === 0) {
-    const err = new Error("Image not found") as CustomError;
+    const err = new Error("Your canva is empty") as CustomError;
     err.statusCode = 404;
     throw err;
   }

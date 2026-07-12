@@ -3,6 +3,7 @@ import { ResultSetHeader } from "mysql2";
 import { randomUUID } from "node:crypto";
 import db from "../configs/db";
 import cloudinary from "../libs/cloudinary";
+import { sendEmail } from "../libs/sendEmail";
 import { Admin, CustomError } from "../types";
 import { bufferToUuid } from "../utils";
 import getDataUri from "../utils/dataUri";
@@ -110,49 +111,6 @@ const login = async (email: string, password: string) => {
   return { admin: responseUser, token };
 };
 
-const resetPassword = async (
-  adminId: string,
-  currentPassword: string,
-  newPassword: string,
-) => {
-  const [admins] = await db.execute<Admin[]>(
-    `SELECT *
-     FROM admins
-     WHERE id = UUID_TO_BIN(?)`,
-    [adminId],
-  );
-
-  if (admins.length === 0) {
-    const err = new Error("Admin not found.") as CustomError;
-    err.statusCode = 404;
-    throw err;
-  }
-
-  const admin = admins[0];
-
-  const isPasswordCorrect = await bcrypt.compare(
-    currentPassword,
-    admin.password,
-  );
-
-  if (!isPasswordCorrect) {
-    const err = new Error("Current password is incorrect.") as CustomError;
-    err.statusCode = 401;
-    throw err;
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  await db.execute<ResultSetHeader>(
-    `UPDATE admins
-     SET password = ?
-     WHERE id = UUID_TO_BIN(?)`,
-    [hashedPassword, adminId],
-  );
-
-  return `Password changed for ${admin?.name} successfully`;
-};
-
 const updateById = async (
   adminId: string,
   name: string,
@@ -204,4 +162,109 @@ const updateById = async (
   return `Admin updated successfully`;
 };
 
-export { login, register, resetPassword, updateById };
+const emailVerify = async (email: string) => {
+  const [admins] = await db.execute<Admin[]>(
+    "SELECT * FROM admins WHERE email = ?",
+    [email],
+  );
+
+  if (admins.length === 0) {
+    const err = new Error("User not found with this email.") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const code = String(Math.floor(100000 + Math.random() * 900000)).toString();
+
+  const expiry = new Date(Date.now() + 5 * 60 * 1000);
+
+  await db.execute<ResultSetHeader>(
+    `UPDATE admins
+     SET otp = ?,
+     otp_expires_at = ?
+     WHERE email = ?`,
+    [code, expiry, email],
+  );
+
+  await sendEmail(
+    email,
+    "OTP Verification",
+    `Your OTP is ${code}. It will expire in 5 minutes.`,
+  );
+
+  return {
+    message: "OTP sent to your mail.",
+  };
+};
+
+const otpVerify = async (email: string, otp: string) => {
+  const [admins] = await db.execute<Admin[]>(
+    `SELECT *
+     FROM admins
+     WHERE email = ?
+       AND otp = ?`,
+    [email, otp],
+  );
+
+  if (admins.length === 0) {
+    const err = new Error("Invalid OTP.") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const admin = admins[0];
+
+  if (!admin.otp) {
+    const err = new Error("OTP not found.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (admin.otp !== otp) {
+    const err = new Error("Invalid OTP.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (!admin.otp_expires_at || new Date(admin.otp_expires_at) < new Date()) {
+    const err = new Error("OTP expired.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  return {
+    message: "OTP verified successfully.",
+  };
+};
+
+const resetPassword = async (email: string, password: string) => {
+  const [admins] = await db.execute<Admin[]>(
+    `SELECT *
+     FROM admins
+     WHERE email = ?`,
+    [email],
+  );
+
+  if (admins.length === 0) {
+    const err = new Error("Admin not found.") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const admin = admins[0];
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await db.execute<ResultSetHeader>(
+    `UPDATE admins
+     SET password = ?
+      WHERE email = ?`,
+    [hashedPassword, email],
+  );
+
+  return {
+    message: `Password changed for ${admin?.name} successfully`,
+  };
+};
+
+export { emailVerify, login, otpVerify, register, resetPassword, updateById };

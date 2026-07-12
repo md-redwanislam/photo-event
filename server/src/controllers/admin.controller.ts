@@ -63,37 +63,6 @@ const loginAdmin = async (req: Request, res: Response) => {
     });
 };
 
-const resetAdminPassword = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const adminId = req.user?.id as string;
-
-  const { currentPassword, newPassword } = req.body as {
-    currentPassword: string;
-    newPassword: string;
-  };
-
-  if (!currentPassword || !newPassword) {
-    const err = new Error(
-      "Current password and new password are required.",
-    ) as CustomError;
-    err.statusCode = 400;
-    throw err;
-  }
-
-  const message = await AdminService.resetPassword(
-    adminId,
-    currentPassword,
-    newPassword,
-  );
-
-  res.status(200).json({
-    success: true,
-    message,
-  });
-};
-
 const updateAdmin = async (req: Request, res: Response): Promise<void> => {
   const adminId = req.user?.id;
 
@@ -133,4 +102,72 @@ const updateAdmin = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-export { loginAdmin, registerAdmin, resetAdminPassword, updateAdmin };
+const emailVerify = async (req: Request, res: Response): Promise<void> => {
+  const { email } = req.body as {
+    email: string;
+  };
+
+  if (!email) {
+    const err = new Error("Please provide email.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const result = await AdminService.emailVerify(email);
+
+  res.status(200).send({
+    success: true,
+    result,
+  });
+};
+
+const otpVerify = async (req: Request, res: Response): Promise<void> => {
+  const email = req.query.email as string;
+
+  const { otp } = req.body as {
+    otp: string;
+  };
+
+  if (!otp) {
+    const err = new Error("Please provide OTP.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const result = await AdminService.otpVerify(email, otp);
+
+  res.status(200).send({
+    success: true,
+    result,
+  });
+};
+
+const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  const email = req.query.email as string;
+
+  const { password } = req.body as {
+    password: string;
+  };
+
+  if (!password) {
+    const err = new Error("Please provide password.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const result = await AdminService.resetPassword(email, password);
+
+  res.status(200).send({
+    success: true,
+    result,
+  });
+};
+
+export {
+  emailVerify,
+  loginAdmin,
+  otpVerify,
+  registerAdmin,
+  resetPassword,
+  updateAdmin,
+};

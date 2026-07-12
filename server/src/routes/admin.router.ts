@@ -26,9 +26,13 @@ router
   .route("/update")
   .put(singleUpload("profile_pic"), catchAsync(AdminController.updateAdmin));
 router.route("/login").post(catchAsync(AdminController.loginAdmin));
-router
-  .route("/reset-password")
-  .patch(catchAsync(AdminController.resetAdminPassword));
+
+router.post("/email-verify", catchAsync(AdminController.emailVerify));
+
+router.post("/otp-verify", catchAsync(AdminController.otpVerify));
+
+router.put("/reset-password", catchAsync(AdminController.resetPassword));
+
 router.route("/logout").post(catchAsync(AuthController.logoutUser));
 
 router

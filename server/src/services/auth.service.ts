@@ -112,7 +112,7 @@ const sendResetOtp = async (phone: string) => {
     `
     UPDATE users
     SET otp = ?,
-        otp_expires_at = ?
+    otp_expires_at = ?
     WHERE phone = ?
     `,
     [otp, expiry, phone],
@@ -134,8 +134,9 @@ const verifyResetOtp = async (phone: string, otp: string) => {
   const [users] = await db.execute<User[]>(
     `SELECT *
      FROM users
-     WHERE phone = ?`,
-    [phone],
+     WHERE phone = ?,
+     and otp = ?`,
+    [phone, otp],
   );
 
   if (!users.length) {

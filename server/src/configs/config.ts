@@ -45,12 +45,19 @@ interface SMSConfig {
   secretKey: string | undefined;
   callerID: string | undefined;
 }
+interface EmailConfig {
+  host: string | undefined;
+  port: string | undefined;
+  user: string | undefined;
+  pass: string | undefined;
+}
 
 interface Config {
   app: AppConfig;
   db: DBConfig;
   jwtoken: JWTConfig;
   sms: SMSConfig;
+  email: EmailConfig;
   cors: CorsConfig;
   limit: LimitConfig;
   limiter: LimiterConfig;
@@ -77,6 +84,12 @@ const config: Config = {
     expiresIn: process.env.JWT_EXPIRES_IN,
     refresh_secretKey: process.env.REFRESH_SECRET_KEY,
     refresh_expiresIn: process.env.REFRESH_JWT_EXPIRES_IN,
+  },
+  email: {
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
   sms: {
     host: process.env.SMS_HOST,

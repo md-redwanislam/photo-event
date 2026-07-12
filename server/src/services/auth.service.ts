@@ -205,7 +205,7 @@ const resetPassword = async (phone: string, newPassword: string) => {
         otp_expires_at = NULL
     WHERE phone = ?
     `,
-    [hashedPassword, phone],
+    [hashedPassword || user.password, phone],
   );
 
   return "Password reset successful";

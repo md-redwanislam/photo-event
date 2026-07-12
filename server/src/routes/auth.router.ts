@@ -16,6 +16,6 @@ router.post(
 
 router.post("/reset-password/verify-otp", catchAsync(AuthController.verifyOtp));
 
-router.post("/reset-password", catchAsync(AuthController.resetPassword));
+router.put("/reset-password", catchAsync(AuthController.resetPassword));
 
 export default router;

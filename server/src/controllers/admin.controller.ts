@@ -113,11 +113,11 @@ const emailVerify = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const result = await AdminService.emailVerify(email);
+  const message = await AdminService.emailVerify(email);
 
   res.status(200).send({
     success: true,
-    result,
+    message,
   });
 };
 
@@ -134,11 +134,11 @@ const otpVerify = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const result = await AdminService.otpVerify(email, otp);
+  const message = await AdminService.otpVerify(email, otp);
 
   res.status(200).send({
     success: true,
-    result,
+    message,
   });
 };
 
@@ -155,11 +155,11 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     throw err;
   }
 
-  const result = await AdminService.resetPassword(email, password);
+  const message = await AdminService.resetPassword(email, password);
 
   res.status(200).send({
     success: true,
-    result,
+    message,
   });
 };
 

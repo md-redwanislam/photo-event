@@ -192,9 +192,7 @@ const emailVerify = async (email: string) => {
     `Your OTP is ${code}. It will expire in 5 minutes.`,
   );
 
-  return {
-    message: "OTP sent to your mail.",
-  };
+  return "OTP sent to your mail.";
 };
 
 const otpVerify = async (email: string, otp: string) => {
@@ -232,9 +230,7 @@ const otpVerify = async (email: string, otp: string) => {
     throw err;
   }
 
-  return {
-    message: "OTP verified successfully.",
-  };
+  return "OTP verified successfully.";
 };
 
 const resetPassword = async (email: string, password: string) => {
@@ -262,9 +258,7 @@ const resetPassword = async (email: string, password: string) => {
     [hashedPassword, email],
   );
 
-  return {
-    message: `Password changed for ${admin?.name} successfully`,
-  };
+  return `Password changed for ${admin?.name} successfully`;
 };
 
 export { emailVerify, login, otpVerify, register, resetPassword, updateById };

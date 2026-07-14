@@ -93,6 +93,7 @@ const update = async (
   }
 
   let imageUrl = rows[0].image_url;
+  let publicId = rows[0].public_id;
 
   if (image) {
     if (rows[0].public_id) {
@@ -105,6 +106,7 @@ const update = async (
     });
 
     imageUrl = cloudResponse.url;
+    publicId = cloudResponse.public_id;
   }
 
   await db.execute<ResultSetHeader>(
@@ -112,13 +114,14 @@ const update = async (
       UPDATE images
       SET
         image_url = ?,
+        public_id = ?,
         caption = ?,
         updated_at = NOW()
       WHERE
         id = UUID_TO_BIN(?)
         AND uploader_id = UUID_TO_BIN(?)
     `,
-    [imageUrl, caption ?? null, imageId, userId],
+    [imageUrl, publicId, caption ?? null, imageId, userId],
   );
 };
 
@@ -331,6 +334,25 @@ const getAdminImageById = async (imageId: string) => {
 };
 
 const deleteImageById = async (imageId: string) => {
+  const [rows] = await db.execute<any[]>(
+    `
+  SELECT public_id
+  FROM images
+  WHERE
+      id = UUID_TO_BIN(?)
+  `,
+    [imageId],
+  );
+
+  if (!rows.length) {
+    const err = new Error("Image not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (rows[0].public_id) {
+    await cloudinary.uploader.destroy(rows[0].public_id);
+  }
   const [result] = await db.execute<ResultSetHeader>(
     `DELETE FROM images WHERE id = UUID_TO_BIN(?)`,
     [imageId],

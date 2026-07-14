@@ -32,6 +32,7 @@ const register = async (
   const hashedPassword = await bcrypt.hash(password, 10);
 
   let profilePicUrl: string | null = null;
+  let public_id: string | null = null;
 
   if (profile_pic) {
     const fileUri = getDataUri(profile_pic);
@@ -41,6 +42,7 @@ const register = async (
     });
 
     profilePicUrl = cloudResponse.url;
+    public_id = cloudResponse.public_id;
   }
 
   const id = randomUUID();
@@ -53,7 +55,8 @@ const register = async (
         email,
         password,
         bio,
-        profile_pic
+        profile_pic,
+        public_id
       )
      VALUES
       (
@@ -62,9 +65,11 @@ const register = async (
         ?,
         ?,
         ?,
+        ?,
+        ?,
         ?
       )`,
-    [id, name, email, hashedPassword, bio ?? null, profilePicUrl],
+    [id, name, email, hashedPassword, bio ?? null, profilePicUrl, public_id],
   );
 
   return {
@@ -124,9 +129,20 @@ const updateById = async (
     [adminId],
   );
 
-  let profilePicUrl: string | null = null;
+  if (admin.length === 0) {
+    const err = new Error("Admin not found") as CustomError;
+    err.statusCode = 404;
+    throw err;
+  }
+
+  let profilePicUrl: string | null = admin[0].profile_pic;
+  let publicId: string | null = admin[0].public_id;
 
   if (profile_pic) {
+    if (admin[0].public_id) {
+      await cloudinary.uploader.destroy(admin[0].public_id);
+    }
+
     const fileUri = getDataUri(profile_pic);
 
     const cloudResponse = await cloudinary.uploader.upload(fileUri.content!, {
@@ -135,6 +151,7 @@ const updateById = async (
     });
 
     profilePicUrl = cloudResponse.url;
+    publicId = cloudResponse.public_id;
   }
 
   const [result] = await db.execute<ResultSetHeader>(
@@ -142,24 +159,26 @@ const updateById = async (
       name=?,
       email=?,
       bio=?,
-      profile_pic=?
+      profile_pic=?,
+      public_id = ?
      WHERE id = UUID_TO_BIN(?)`,
     [
       name || admin[0].name,
       email || admin[0].email,
       bio || admin[0].bio,
-      profilePicUrl || admin[0].profile_pic,
+      profilePicUrl,
+      publicId,
       adminId,
     ],
   );
 
   if (result.affectedRows === 0) {
-    const err = new Error("Admin not found") as CustomError;
+    const err = new Error("Failed to update") as CustomError;
     err.statusCode = 404;
     throw err;
   }
 
-  return `Admin updated successfully`;
+  return `Admin ${admin[0].name} updated successfully`;
 };
 
 const emailVerify = async (email: string) => {
@@ -169,7 +188,7 @@ const emailVerify = async (email: string) => {
   );
 
   if (admins.length === 0) {
-    const err = new Error("User not found with this email.") as CustomError;
+    const err = new Error("Admin not found with this email.") as CustomError;
     err.statusCode = 404;
     throw err;
   }
@@ -205,7 +224,7 @@ const otpVerify = async (email: string, otp: string) => {
   );
 
   if (admins.length === 0) {
-    const err = new Error("Invalid OTP.") as CustomError;
+    const err = new Error("Admin does not exist!") as CustomError;
     err.statusCode = 404;
     throw err;
   }
@@ -249,16 +268,30 @@ const resetPassword = async (email: string, password: string) => {
 
   const admin = admins[0];
 
+  if (!admin.otp) {
+    const err = new Error("OTP not found.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (!admin.otp_expires_at || new Date(admin.otp_expires_at) < new Date()) {
+    const err = new Error("OTP expired.") as CustomError;
+    err.statusCode = 400;
+    throw err;
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
   await db.execute<ResultSetHeader>(
     `UPDATE admins
-     SET password = ?
+     SET password = ?,
+     otp = NULL,
+     otp_expires_at = NULL
       WHERE email = ?`,
     [hashedPassword, email],
   );
 
-  return `Password changed for ${admin?.name} successfully`;
+  return `Password changed for ${admin?.name} successful`;
 };
 
 export { emailVerify, login, otpVerify, register, resetPassword, updateById };

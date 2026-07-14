@@ -99,14 +99,14 @@ const sendResetOtp = async (phone: string) => {
   );
 
   if (!users.length) {
-    const err = new Error("User not found.") as CustomError;
+    const err = new Error("User not found with this number.") as CustomError;
     err.statusCode = 404;
     throw err;
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+  const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
   await db.execute<ResultSetHeader>(
     `
@@ -128,6 +128,7 @@ const sendResetOtp = async (phone: string) => {
     err.statusCode = 500;
     throw err;
   }
+  return "OTP sent successfully to your mobile";
 };
 
 const verifyResetOtp = async (phone: string, otp: string) => {
@@ -165,7 +166,7 @@ const verifyResetOtp = async (phone: string, otp: string) => {
     throw err;
   }
 
-  return true;
+  return "OTP verified successfully.";
 };
 
 const resetPassword = async (phone: string, newPassword: string) => {
@@ -202,14 +203,14 @@ const resetPassword = async (phone: string, newPassword: string) => {
     `
     UPDATE users
     SET password = ?,
-        otp = NULL,
-        otp_expires_at = NULL
+    otp = NULL,
+    otp_expires_at = NULL
     WHERE phone = ?
     `,
     [hashedPassword || user.password, phone],
   );
 
-  return "Password reset successful";
+  return `Password changed for ${user?.name} successful`;
 };
 
 export { login, register, resetPassword, sendResetOtp, verifyResetOtp };

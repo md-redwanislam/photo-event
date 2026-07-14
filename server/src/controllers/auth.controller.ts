@@ -72,11 +72,11 @@ const sendResetOtp = async (req: Request, res: Response) => {
     });
   }
 
-  await AuthServices.sendResetOtp(phone);
+  const message = await AuthServices.sendResetOtp(phone);
 
   res.status(200).json({
     success: true,
-    message: "OTP sent successfully to your mobile",
+    message,
   });
 };
 
@@ -85,11 +85,11 @@ const verifyOtp = async (req: Request, res: Response) => {
 
   const { otp } = req.body;
 
-  await AuthServices.verifyResetOtp(phone, otp);
+  const message = await AuthServices.verifyResetOtp(phone, otp);
 
   res.status(200).json({
     success: true,
-    message: "OTP verified successfully",
+    message,
   });
 };
 
@@ -98,11 +98,11 @@ const resetPassword = async (req: Request, res: Response) => {
 
   const { newPassword } = req.body;
 
-  await AuthServices.resetPassword(phone, newPassword);
+  const message = await AuthServices.resetPassword(phone, newPassword);
 
   res.status(200).json({
     success: true,
-    message: "Password reset successful",
+    message,
   });
 };
 
